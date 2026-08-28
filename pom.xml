@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.xcdz.service</groupId>
+  <artifactId>xcdz-backend-service</artifactId>
+  <name>xcdz-backend-service</name>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+     <maven.compiler.source>17</maven.compiler.source>
+     <maven.compiler.target>17</maven.compiler.target>
+     <skipTests>true</skipTests>
+     <jackson.version>2.18.2</jackson.version>
+     <hutool.version>5.8.26</hutool.version>
+     <bean.utils.version>1.9.4</bean.utils.version>
+     <fastjson.version>2.0.53</fastjson.version>
+     <mysql.version>8.0.27</mysql.version>
+     <mybatis.plus.version>3.5.7</mybatis.plus.version>
+     <java.version>17</java.version>
+     <commons.io.version>2.14.0</commons.io.version>
+     <httpclient.version>4.5.9</httpclient.version>
+     <easyexcel.version>3.3.3</easyexcel.version>
+  </properties>
+
+  <parent>
+     <groupId>org.springframework.boot</groupId>
+     <artifactId>spring-boot-starter-parent</artifactId>
+     <version>3.4.3</version>
+     <relativePath/>
+  </parent>
+
+  <dependencies>
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-web</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-test</artifactId>
+          <scope>test</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+<!--          <version>${lombok.version}</version>-->
+          <optional>true</optional>
+      </dependency>
+
+      <!--Hutool-->
+      <dependency>
+          <groupId>cn.hutool</groupId>
+          <artifactId>hutool-all</artifactId>
+          <version>${hutool.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>com.fasterxml.jackson.datatype</groupId>
+          <artifactId>jackson-datatype-jsr310</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+      </dependency>
+
+<!--      <dependency>-->
+<!--          <groupId>org.apache.commons</groupId>-->
+<!--          <artifactId>commons-lang3</artifactId>-->
+<!--          <version>${commons-lang3.version}</version>-->
+<!--      </dependency>-->
+
+      <dependency>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+          <version>${commons.io.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>commons-beanutils</groupId>
+          <artifactId>commons-beanutils</artifactId>
+          <version>${bean.utils.version}</version>
+      </dependency>
+
+      <!--kafka-->
+      <dependency>
+          <groupId>org.springframework.kafka</groupId>
+          <artifactId>spring-kafka</artifactId>
+      </dependency>
+
+      <!--FastJson-->
+      <dependency>
+          <groupId>com.alibaba</groupId>
+          <artifactId>fastjson</artifactId>
+          <version>${fastjson.version}</version>
+      </dependency>
+
+      <!--httpclient-->
+      <dependency>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+          <version>${httpclient.version}</version>
+      </dependency>
+
+      <!--WebSocket-->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-websocket</artifactId>
+      </dependency>
+
+      <!--jsr验证框架-->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-validation</artifactId>
+      </dependency>
+
+      <!--MybatisPlus-->
+      <dependency>
+          <groupId>com.baomidou</groupId>
+          <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+          <version>${mybatis.plus.version}</version>
+      </dependency>
+
+      <!--Mysql驱动 -->
+      <dependency>
+          <groupId>mysql</groupId>
+          <artifactId>mysql-connector-java</artifactId>
+          <version>${mysql.version}</version>
+          <scope>runtime</scope>
+      </dependency>
+
+      <!-- Spring Cache 抽象 -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-cache</artifactId>
+      </dependency>
+
+      <!-- Ehcache 3.x 核心库 -->
+      <dependency>
+          <groupId>org.ehcache</groupId>
+          <artifactId>ehcache</artifactId>
+          <version>${ehcache3.version}</version>
+          <classifier>jakarta</classifier>
+      </dependency>
+
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-actuator</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>com.alibaba</groupId>
+          <artifactId>easyexcel</artifactId>
+          <version>${easyexcel.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.ehcache</groupId>
+                  <artifactId>ehcache</artifactId>
+              </exclusion>
+          </exclusions>
+      </dependency>
+
+      <!-- Knife4j 接口文档（Spring Boot 3 / jakarta 版） -->
+      <dependency>
+          <groupId>com.github.xiaoymin</groupId>
+          <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+          <version>4.5.0</version>
+      </dependency>
+  </dependencies>
+
+  <build>
+      <finalName>${project.name}.${project.version}</finalName>
+      <plugins>
+          <plugin>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-maven-plugin</artifactId>
+          </plugin>
+
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.8.1</version>
+              <configuration>
+                  <source>${java.version}</source>
+                  <target>${java.version}</target>
+                  <!-- JDK 21.0.12+ 默认禁用未显式声明的注解处理（JDK-8306819 回移），
+                       显式 proc=full 恢复 classpath 上的 Lombok 处理器执行，否则 mvn 编译
+                       所有 @Slf4j/@Data 符号缺失（IDEA 内置构建不受影响，仅命令行 mvn 受影响） -->
+                  <proc>full</proc>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+
+</project>

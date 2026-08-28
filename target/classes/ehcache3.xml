@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<config
+    xmlns="http://www.ehcache.org/v3"
+    xmlns:jsr107="http://www.ehcache.org/v3/jsr107"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+    http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core.xsd
+    http://www.ehcache.org/v3/jsr107 http://www.ehcache.org/schema/ehcache-107-ext.xsd">
+    <service>
+        <jsr107:defaults enable-statistics="true" enable-management="true"/>
+    </service>
+    <!--持久化根目录 所有带persistent = true的磁盘缓存都会落到这里-->
+<!--    <persistence directory="/data/java/ehcache3"/>-->
+    <!--定义定时任务模版-->
+    <cache-template name="deviceTemplate">
+        <key-type>java.lang.String</key-type>
+        <value-type>com.chengxin.service.vo.DeviceInfoVO</value-type>
+<!--    <expiry>-->
+<!--        <ttl unit="minutes">10</ttl>-->
+<!--    </expiry>-->
+        <resources>
+            <heap unit="MB">50</heap>
+            <offheap unit="MB">100</offheap>
+<!--        <disk unit="MB" persistent="true">500</disk>-->
+        </resources>
+    </cache-template>
+
+    <!--设备缓存-->
+    <cache alias="deviceInfoCache" uses-template="deviceTemplate"/>
+</config>
