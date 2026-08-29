@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class TrackSubscribeDTO implements Serializable {
     //目标名称模糊关键字（LIKE 匹配 target.target_name）；null 表示不限制（全部目标），
     //空白关键字由入口层归一化为 null 后再传入
-    private String target;
+    private String targetName;
 
     //采集时间下界（含）；null 表示不限制（已由入口层按 yyyy-MM-dd HH:mm:ss 解析）
     private LocalDateTime startTime;

@@ -21,8 +21,8 @@ import java.time.LocalDateTime;
 @Data
 @Accessors(chain = true)
 public class TrackDetailDTO implements Serializable {
-    //track.id 自增主键（单调递增，推送水位依据）
-    private Long id;
+    //track.id（String 雪花id，19 位定长数字字符串，字典序与数值序一致，推送水位依据）
+    private String id;
 
     //所属目标id → target.id（前端"按目标筛选"的关联字段）
     private String targetId;

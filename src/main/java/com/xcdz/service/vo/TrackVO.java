@@ -18,8 +18,8 @@ import java.math.BigDecimal;
 @Data
 @Accessors(chain = true)
 public class TrackVO implements Serializable {
-    //数据id（自增，单调递增）
-    private Long id;
+    //数据id（String 雪花id）
+    private String id;
 
     //所属目标id
     private String targetId;

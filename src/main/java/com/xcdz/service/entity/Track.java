@@ -18,9 +18,11 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @TableName("track")
 public class Track implements Serializable {
-    //自增主键（水位轮询依据：单调递增，故有意偏离项目 String 雪花id 惯例而用 IdType.AUTO）
-    @TableId(type = IdType.AUTO)
-    private Long id;
+    //数据id（String 雪花id，MP assign_id 生成，与项目惯例统一；
+    //19 位定长数字字符串，趋势单调递增且字典序与数值序一致，
+    //推送侧水位游标（id > afterId）与按 id 升序翻页的语义不受类型变更影响）
+    @TableId(type = IdType.ASSIGN_ID)
+    private String id;
 
     //所属目标id → target.id（前端"按目标筛选"的关联字段）
     private String targetId;

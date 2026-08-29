@@ -3,7 +3,6 @@ package com.xcdz.service.push;
 import com.alibaba.fastjson.JSON;
 import com.xcdz.service.dto.TrackSubscribeDTO;
 import com.xcdz.service.utils.TrackConvert;
-import com.xcdz.service.websocket.protocol.WsEnvelope;
 import com.xcdz.service.websocket.protocol.WsMessageProcessor;
 import com.xcdz.service.websocket.session.WsSessionManager;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +19,8 @@ import java.util.Set;
  * 功能:目标/批次推送业务消息处理器——承接通用路由层分发的 SUBSCRIBE / UNSUBSCRIBE
  * 分层契约:本类只做"业务报文解析与入口校验"，业务入参组装为 TrackSubscribeDTO 后
  * 委托 TrackPushTask；本类不包含任何业务规则与数据访问
+ * 协议说明（v2）:客户端请求报文为独立的 TrackWsRequest；
+ * 业务错误统一经 TrackWsMessage/ERROR 回执（通用层 WsEnvelope 仅承载协议级错误）
  */
 @Slf4j
 @Component
@@ -36,7 +37,7 @@ public class TrackPushProcessor implements WsMessageProcessor {
      */
     @Override
     public Set<String> supportTypes() {
-        return Set.of(TrackWsMessage.TYPE_SUBSCRIBE, TrackWsMessage.TYPE_UNSUBSCRIBE);
+        return Set.of(TrackWsRequest.TYPE_SUBSCRIBE, TrackWsRequest.TYPE_UNSUBSCRIBE);
     }
 
     /**
@@ -44,14 +45,14 @@ public class TrackPushProcessor implements WsMessageProcessor {
      */
     @Override
     public void process(WebSocketSession session, String type, String rawPayload) {
-        if (TrackWsMessage.TYPE_UNSUBSCRIBE.equals(type)) {
+        if (TrackWsRequest.TYPE_UNSUBSCRIBE.equals(type)) {
             pushTask.unsubscribe(session);
             return;
         }
-        final TrackWsMessage req;
+        final TrackWsRequest req;
         try {
             //fastjson 反序列化，未知字段忽略，缺失字段为 null
-            req = JSON.parseObject(rawPayload, TrackWsMessage.class);
+            req = JSON.parseObject(rawPayload, TrackWsRequest.class);
         } catch (Exception e) {
             sendError(session, "报文解析失败: " + e.getMessage());
             return;
@@ -68,10 +69,10 @@ public class TrackPushProcessor implements WsMessageProcessor {
     }
 
     /**
-     * 处理订阅:入口层校验（时间格式/区间合法性）+ 组装业务 DTO（空 target 归一化为 null=全部目标），
-     * 业务流程（快照/水位/登记）委托推送任务
+     * 处理订阅:入口层校验（时间格式/区间合法性）+ 组装业务 DTO（空 targetName 归一化为 null=全部目标），
+     * 业务流程（流式完整快照/登记）委托推送任务
      */
-    private void handleSubscribe(WebSocketSession session, TrackWsMessage req) {
+    private void handleSubscribe(WebSocketSession session, TrackWsRequest req) {
         /**
          * 开始、结束时间校验
          */
@@ -87,13 +88,13 @@ public class TrackPushProcessor implements WsMessageProcessor {
             sendError(session, "startTime 不能晚于 endTime");
             return;
         }
-        //归一化:空白关键字 → null（全部目标），与契约"target 空串=全部"一致
-        String target = req.getTarget();
-        if (target != null && target.trim().isEmpty()) {
-            target = null;
+        //归一化:空白关键字 → null（全部目标），与契约"targetName 空串=全部"一致
+        String targetName = req.getTargetName();
+        if (targetName != null && targetName.trim().isEmpty()) {
+            targetName = null;
         }
         TrackSubscribeDTO dto = new TrackSubscribeDTO()
-                .setTarget(target)
+                .setTargetName(targetName)
                 .setStartTime(startTime)
                 .setEndTime(endTime);
         pushTask.subscribe(session, dto);
@@ -116,11 +117,12 @@ public class TrackPushProcessor implements WsMessageProcessor {
     }
 
     /**
-     * 向单个连接回执错误信息（不中断连接，客户端可修正报文后重试）
+     * 向单个连接回执业务错误信息（v2 协议 ERROR 报文；不中断连接，客户端可修正报文后重试）
      */
     private void sendError(WebSocketSession session, String message) {
-        sessionManager.send(session, new WsEnvelope().setType(WsEnvelope.TYPE_ERROR).setMessage(message));
+        sessionManager.send(session, new TrackWsMessage()
+                .setType(TrackWsMessage.TYPE_ERROR)
+                .setMessage(message)
+        );
     }
 }
-
-

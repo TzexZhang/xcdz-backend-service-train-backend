@@ -26,34 +26,16 @@ public class TrackServiceImpl implements TrackService {
 
     /**
      * 条件查询编排:limit 非正数属非法业务参数直接返回空（不发起无效查库），
-     * 其余过滤语义（空白关键字=全部目标、时间为空=不限制）由 Mapper 的 XML 动态条件兜底
+     * 其余过滤语义（空白关键字=全部目标、时间为空=不限制、afterId 空=首页）
+     * 由 Mapper 的 XML 动态条件兜底
      */
     @Override
-    public List<TrackDetailDTO> findByCondition(String target, LocalDateTime startTime, LocalDateTime endTime, int limit) {
+    public List<TrackDetailDTO> findByCondition(String targetName, LocalDateTime startTime, LocalDateTime endTime,
+                                                String afterId, int limit) {
         if (limit <= 0) {
             return Collections.emptyList();
         }
-        return trackMapper.selectByCondition(target, startTime, endTime, limit);
-    }
-
-    /**
-     * 水位增量查询编排:limit 非正数防御，同上
-     */
-    @Override
-    public List<TrackDetailDTO> findIncremental(long afterId, int limit) {
-        if (limit <= 0) {
-            return Collections.emptyList();
-        }
-        return trackMapper.selectIncremental(afterId, limit);
-    }
-
-    /**
-     * 最大 id 查询编排:直接委托 Mapper（MP 3.5.7 BaseMapper 无 insertBatch/聚合，
-     * 该"取最大id"语义已在 Mapper 以 selectOne+order by 实现）
-     */
-    @Override
-    public long maxId() {
-        return trackMapper.selectMaxId();
+        return trackMapper.selectByCondition(targetName, startTime, endTime, afterId, limit);
     }
 
     /**

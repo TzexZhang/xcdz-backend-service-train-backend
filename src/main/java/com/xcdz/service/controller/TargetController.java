@@ -60,7 +60,7 @@ public class TargetController {
      */
     @Operation(summary = "批次数据条件查询（对账用）",
             description = "按目标名称模糊关键字与采集时间范围查询 track（LEFT JOIN target 组合目标名称），"
-                    + "条件语义与 WebSocket 订阅一致；target 为名称模糊关键字（LIKE），时间格式 yyyy-MM-dd HH:mm:ss")
+                    + "条件语义与 WebSocket 订阅一致；targetName 为名称模糊关键字（LIKE），时间格式 yyyy-MM-dd HH:mm:ss")
     @GetMapping("/track/query")
     public R<?> queryTracks(@ParameterObject TrackQueryDTO dto) {
         log.info("批次数据条件查询: {}", dto);
@@ -78,7 +78,9 @@ public class TargetController {
             return ResponseUtils.fail("startTime 不能晚于 endTime");
         }
 
-        List<TrackDetailDTO> tracks = trackService.findByCondition(dto.getTarget(), start, end, limit);
+        //afterId 空白归一化为 null（= 首页不限制），游标语义由 XML 动态条件兜底
+        String afterId = (dto.getAfterId() == null || dto.getAfterId().trim().isEmpty()) ? null : dto.getAfterId().trim();
+        List<TrackDetailDTO> tracks = trackService.findByCondition(dto.getTargetName(), start, end, afterId, limit);
         return ResponseUtils.ok(TrackConvert.toVOList(tracks));
     }
 

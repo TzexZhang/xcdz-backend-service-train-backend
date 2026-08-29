@@ -1,5 +1,7 @@
 package com.xcdz.service.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -15,7 +17,9 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @TableName("target")
 public class Target implements Serializable {
-    //目标id（String 雪花id，项目惯例 assign_id 生成；SQL 脚本预置数据用 TG-DEMO-xxx 可读前缀）
+    //目标id（String 雪花id，显式声明 @TableId 锁定 assign_id 策略，
+    //不依赖全局配置；SQL 脚本预置数据用 TG-DEMO-xxx 可读前缀）
+    @TableId(type = IdType.ASSIGN_ID)
     private String id;
 
     //目标名称
