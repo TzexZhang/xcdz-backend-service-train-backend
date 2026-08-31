@@ -12,6 +12,19 @@ spring:
     name: xcdz-backend-service
   profiles:
     active: prod
+  # ========== Kafka（CDC 事件消费）==========
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: xcdz-push
+      # 无位点时从最早开始（topic 内均为 CDC 增量事件，不含存量）
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      # 批量消费:一批事件一次持锁分发（水位/seq 批内连续）
+      type: batch
+      ack-mode: batch
   cache:
     type: jcache
     jcache:
@@ -93,3 +106,14 @@ knife4j:
     language: zh_cn                 # 中文界面
     enable-version: true            # 显示接口版本信息
     enable-reload-cache-parameter: false
+
+# ========== 实时推送（CDC 方案）==========
+push:
+  # WebSocket 背压保护（慢消费者阈值，超限断连、重连即完整快照自愈）
+  ws:
+    send-time-limit-ms: 5000        # 单次发送超时毫秒数
+    buffer-size-limit-bytes: 524288 # 单连接发送缓冲字节上限（512KB）
+  # Debezium CDC topic（默认命名 {topic.prefix}.{db}.{table}）
+  cdc:
+    track-topic: xcdz.train.track   # track 表变更事件
+    target-topic: xcdz.train.target # target 表变更事件（维度缓存维护）
