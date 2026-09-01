@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  软件单元:JAVA-MAPPER-TRACK-XML-001
+  功能:批次数据联表查询 SQL（track LEFT JOIN target 组合目标名称）
+  设计说明:
+    1. JOIN 查询超出 LambdaQueryWrapper 能力范围（Wrapper 仅支持单表），
+       按项目约定回归 XML 方式，SQL 与动态条件在此集中维护；
+    2. 统一 LEFT JOIN 而非 INNER JOIN:track 行数语义必须与单表查询一致——
+       推送快照完整性与去重水位都依赖"查到多少条 track"，目标行缺失仅
+       导致 targetName 为 null，不可丢 track 行；
+    3. 结果映射依赖 map-underscore-to-camel-case（application.yml 已开启），
+       列名 target_name → targetName 自动映射，无需 resultMap；
+    4. 感知方式说明（CDC 方案）:水位增量查询 selectIncremental 已随轮询感知层
+       退役删除；selectByCondition 增加 id 游标（afterId）支撑订阅流式完整快照
+       的游标分页（无截断、无 REST 对账）
+-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcdz.service.mapper.TrackMapper">
+
+    <!-- 联表公共列清单:track 全列 + 组合的 target_name -->
+    <sql id="baseColumns">
+        t.id, t.target_id, tg.target_name, t.metric_value, t.collect_time, t.create_time
+    </sql>
+
+    <!-- 条件游标查询（订阅流式完整快照的分页）:过滤语义与 WebSocket 订阅一致，
+         目标名称模糊关键字（空白=全部目标）、时间为空=不限制、
+         id 游标翻页（首查 afterId 空=不限制）；LIMIT 用占位符预编译。
+         游标/排序语义:id 为 19 位定长数字雪花字符串，字典序与数值序一致，
+         id > afterId 与 ORDER BY id ASC 按字符串比较且结果等价数值序 -->
+    <select id="selectByCondition" resultType="com.xcdz.service.dto.TrackDetailDTO">
+        SELECT <include refid="baseColumns"/>
+        FROM track t
+        LEFT JOIN target tg ON tg.id = t.target_id
+        <where>
+            <if test="afterId != null and afterId != ''">
+                AND t.id &gt; #{afterId}
+            </if>
+            <if test="targetName != null and targetName != ''">
+                AND tg.target_name LIKE CONCAT('%', #{targetName}, '%')
+            </if>
+            <if test="startTime != null">AND t.collect_time &gt;= #{startTime}</if>
+            <if test="endTime != null">AND t.collect_time &lt;= #{endTime}</if>
+        </where>
+        ORDER BY t.id ASC
+        LIMIT #{limit}
+    </select>
+</mapper>

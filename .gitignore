@@ -1,0 +1,27 @@
+# ---- Build ----
+target/
+*.class
+*.jar
+*.war
+
+# ---- IDE: IntelliJ IDEA ----
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ---- IDE: VS Code ----
+.vscode/
+
+# ---- Local agent/tool artifacts ----
+.zcode/
+.codegraph/
+
+# ---- Logs ----
+logs/
+*.log
+LOG_PATH_SPRING_IS_UNDEFINED/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db

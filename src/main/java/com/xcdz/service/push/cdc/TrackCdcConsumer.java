@@ -56,6 +56,9 @@ public class TrackCdcConsumer {
     @Autowired
     private TargetNameCache targetCache;
 
+    /**
+     * 指标注册表：用于埋点
+     */
     @Autowired
     private MeterRegistry meterRegistry;
 
@@ -84,8 +87,18 @@ public class TrackCdcConsumer {
             if (after == null) {
                 continue;
             }
+            /**
+             * after 载荷 → 业务 DTO（targetName 由维度缓存补齐，等价原 LEFT JOIN）
+             */
             events.add(toDetail(after));
+            /**
+             * 端到端延迟采样:source.ts_ms（binlog 事务提交时刻，延迟的正确起点）
+             * 与当前时刻之差，记入 cdc.lag 分布（/actuator/metrics/cdc.lag 可查 count/max/mean）
+             */
             recordLag(envelope);
+            /**
+             * 事件计数:cdc.events{op=create|update|read}（delete 在删除分支单独计数）
+             */
             countEvent(normalizeOp(op));
         }
         if (!events.isEmpty()) {
@@ -99,6 +112,7 @@ public class TrackCdcConsumer {
      */
     @KafkaListener(topics = "${push.cdc.target-topic:xcdz.train.target}", groupId = "xcdz-push")
     public void onTargetEvents(List<String> records) {
+        log.info("target 事件到达: {}", records);
         for (String value : records) {
             if (value == null || value.isEmpty()) {
                 continue;
