@@ -36,7 +36,7 @@ public class DataSimulator {
 
     // 仅get set ：使用 volatile 即可；先校验再修改  必须使用 Atomicxxx系列
     //模拟开关（默认开启，POST /simulate/start|stop 切换），无锁原子读改写
-    private final AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicBoolean running = new AtomicBoolean(true);
 
     //写入间隔毫秒（POST /simulate/interval 动态调整），volatile 保证跨线程可见
     private volatile long intervalMillis = 2000L;
@@ -57,7 +57,7 @@ public class DataSimulator {
      * 1 秒 tick:开关开启且距上次写入达到配置间隔时执行一轮写入
      * fixedDelay 保证轮次不重叠；与推送任务共用单线程调度器，串行执行：上一次执行结束 → 下一次开始的间隔
      */
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 5000)
     public void simulateTick() {
         if (!running.get()) {
             return;
